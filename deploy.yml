@@ -1,0 +1,45 @@
+---
+- name: Déployer Apache via Docker
+  hosts: prod
+  become: yes  
+  pre_tasks:
+    - name: Install EPEL repo
+      package: name=epel-release state=present
+      when: ansible_distribution == "CentOS"
+      
+    - name: Download pip script
+      get_url:
+        url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+        dest: /tmp/get-pip.py
+        
+    - name: Install python-pip
+      ansible.builtin.command: python2.7 /tmp/get-pip.py
+      
+    - name: Install docker python
+      pip: name=docker-py
+      
+  tasks:
+
+    - name: Vérifier si Docker est installé
+      command: docker --version
+      changed_when: false
+
+    - name: Créer et démarrer un conteneur Apache
+      docker_container:
+        name: webapp
+        image: httpd:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
+        volumes:
+          - /var/www/html:/usr/local/apache2/htdocs
+
+    - name: Vérifier que le conteneur Apache fonctionne
+      command: docker ps -f "name=webapp"
+      register: apache_running
+      changed_when: false
+
+    - name: Afficher l'état du conteneur
+      debug:
+        msg: "{{ apache_running.stdout lines }}"
