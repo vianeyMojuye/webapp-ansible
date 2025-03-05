@@ -1,13 +1,20 @@
-TP : Déployez un conteneur apache 
+TP : Déployez un conteneur apache :: Utilisation des Notions templating - loop - condition
 
 1- Créez un cluster (1 ansible et 1 client)
 
-2- Créez un fichier inventaire hosts.yml contenant un groupe prod ayant comme seul membre notre hôte client
+2- Créez un dossier templates avec pour contenu le fichier index.html.j2. Celui-ci devrait permettre l'affichage suivant sur le site:
+     binvenue sur - {{nom de l'hôte}}
 
-3- Créez un dossier grou_vars qui composé du fichier prod.yml qui contiendra les informations de connexion à utiliser par ansible (login et password)
+3- Modifiez le playbook deploy.yml tel que:
 
-4- Créez un playbook deploy.yml permettant de deployer apache à l'aide de docker sur la machine cliente( image à utiliser est httpd ; port à exposer est 80)
+     - Utilisez les loop pour installer git et wget à l'aide du module yum
 
-5- utilisez la commande ansible-lint (sudo pip install ansible-lint) : ansible-lint deploy.yml pour vérifier la syntaxe du playbook
+     - Utilisez les conditions afin d'installer wget et git uniquement sur les système CentOs
 
-6- Explorez les options de debug de ansible avec (-vvv ) : ansible-playbook -i hosts.yml -vvv deploy.yml
+     -  Modifiez le site internet par defaut, en copiant un template index.html.j2 affichant le message de bienvenue:
+           {{nom de l'hôte}} est récupéré dans les variables fournies par ansible
+     -  Modifiez le déploiement du conteneur apache afin qu'il monte le fichier index.html dans le repertoire par defaut du site internet apache.
+          vous utiliserez la notion de montage de volume
+      
+4- Vérifiez que votre site est bien conforme aux attentes
+ 
