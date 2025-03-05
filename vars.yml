@@ -1,0 +1,6 @@
+webserver_hostname: "Mon Website Ansible"
+apache_port: "80:80"
+apache_volumes: "/var/www/html:/usr/local/apache2/htdocs"
+template_src: "templates/index.html.j2"
+template_dest: "/var/www/html/index.html"
+website_dir: "/var/www/html"
