@@ -1,7 +1,9 @@
 ---
 - name: Déployer Apache via Docker
   hosts: prod
-  become: yes  
+  become: yes
+  vars_files:
+       - vars.yml
   pre_tasks:
     - name: Install EPEL repo
       package: name=epel-release state=present
@@ -20,6 +22,26 @@
       
   tasks:
 
+    - name: Installer les paquets requis (git et wget) uniquement sur CentOS
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - wget
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Créer un répertoire pour stocker l'index.html
+      file:
+        path: "{{ website_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Générer la page d'accueil index.html
+      template:
+        src: "{{ template_src }}"
+        dest: "{{ template_dest }}"
+        
     - name: Vérifier si Docker est installé
       command: docker --version
       changed_when: false
@@ -31,9 +53,9 @@
         state: started
         restart_policy: always
         ports:
-          - "80:80"
+          - "{{ apache_port }}"
         volumes:
-          - /var/www/html:/usr/local/apache2/htdocs
+          - "{{ apache_volumes }}"
 
     - name: Vérifier que le conteneur Apache fonctionne
       command: docker ps -f "name=webapp"
@@ -42,4 +64,4 @@
 
     - name: Afficher l'état du conteneur
       debug:
-        msg: "{{ apache_running.stdout lines }}"
+        msg: "{{ apache_running.stdout_lines }}"
