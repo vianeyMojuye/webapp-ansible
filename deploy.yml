@@ -42,4 +42,4 @@
 
     - name: Afficher l'état du conteneur
       debug:
-        msg: "{{ apache_running.stdout lines }}"
+        msg: "{{ apache_running.stdout_lines }}"
